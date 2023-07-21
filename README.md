@@ -1,4 +1,4 @@
-## In this README :point_down:
+## README
 
 - [Overview](#overview)
 - [Usage](#usage)
