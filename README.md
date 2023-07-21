@@ -26,11 +26,6 @@ Contains the following files:
 
 ## Usage
 
-### Installation
-
-Install from source
-$ sudo python setup.py install
-
 ### Running
 
 See demo.py for example usage
