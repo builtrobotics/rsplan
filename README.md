@@ -34,10 +34,6 @@ path(start_pt, end_pt, turn_radius, runway_length, step_size, length_tolerance (
 - return a Reeds-Shepp path from start_pt to end_pt with specified turning radius and step_size between points. The length_tolerance default is 2 meters but can be set to user preference — if paths’ total lengths are within length tolerance of each other, the path function will choose the one with fewer segments as the optimal path. The runway_length is for the runway at the end of the path that helps improve accuracy in reaching the final position — this can be set to 0, or a positive or negative number for a forwards or backwards driving runway.
 - start_pt and end_pt are in the format `Tuple[float, float, float]` of x, y, yaw values.
 
-### Demo
-
-$ python demos/demo.py
-
 
 ## FAQ
 
