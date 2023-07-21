@@ -2,7 +2,7 @@
 
 - [Overview](#overview)
 - [Usage](#usage)
-  - [Initial setup](#initial-setup)
+  - [Initial setup](#installation)
   - [Running](#running)
   - [Demo](#demo)
 - [FAQ](#faq)
