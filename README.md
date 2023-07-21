@@ -9,7 +9,7 @@
 - [Exhibits](#exhibits)
 - [References](#references)
 
-### Overview
+## Overview
 This package is a Reeds-Shepp library implementation with Python that is compatible with Python versions including 3.11
 
 Contains the following files:
@@ -24,26 +24,26 @@ Contains the following files:
 - Start and end points are fed into the library functions as `Tuple[float, float, float]` of x, y, yaw floats.
 
 
-### Usage
+## Usage
 
-## Installation
+### Installation
 
 Install from source
 $ sudo python setup.py install
 
-## Running
+### Running
 
 See demo.py for example usage
 
 path(start_pt, end_pt, turn_radius, runway_length, step_size, length_tolerance (optional))
 - return a Reeds-Shepp path from start_pt to end_pt with specified turning radius and step_size between points. The length_tolerance default is 2 meters but can be set to user preference — if paths’ total lengths are within length tolerance of each other, the path function will choose the one with fewer segments as the optimal path. The runway_length is for the runway at the end of the path that helps improve accuracy in reaching the final position — this can be set to 0, or a positive or negative number for a forwards or backwards driving runway.
 
-## Demo
+### Demo
 
 $ python demos/demo.py
 
 
-### FAQ
+## FAQ
 
 What are t, u, and v parameters?
 - As a whole, t, u, v are segment parameters generated in each of the curve helper functions that represent the distance (angular distance for curved segments, linear distance for straight segments) of their respective segments.
@@ -75,7 +75,7 @@ Format: (end x, end y, yaw, turn radius, runway length)
 ![Screenshot from 2023-07-18 11-50-32](https://github.com/builtrobotics/mariana/assets/44348827/eed5e06c-059e-48cb-9dc3-e56346f84476)
 
 
-### References
+## References
 Paper providing more information on the algorithm:
 Reeds, J., & Shepp, L. (1990). Optimal paths for a car that goes both forwards and backwards. https://msp.org/pjm/1990/145-2/pjm-v145-n2-p06-s.pdf
 
