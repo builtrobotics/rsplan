@@ -26,6 +26,12 @@ Contains the following files:
 
 ## Usage
 
+### Installation
+You can install this software using pip:
+
+`pip install -U rs-path`
+
+
 ### Running
 
 See demo.py for example usage
