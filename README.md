@@ -53,6 +53,7 @@ What are t, u, and v parameters?
 From demo.py:
 
 Paths start from origin
+
 Format: (end x, end y, yaw, turn radius, runway length)
 1. (5, 6, np.pi, 1, 0)
 2. (15, 3, np.pi / 2.0, 2, 6)
