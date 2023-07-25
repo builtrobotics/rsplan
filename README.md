@@ -29,7 +29,7 @@ Contains the following files:
 ### Installation
 You can install this software using pip:
 
-`pip install -U rsplan`
+`$ pip install -U rsplan`
 
 
 ### Running
@@ -56,7 +56,16 @@ What are t, u, and v parameters?
 
 ### Exhibits
 
-From demo.py:
+#### How to run the demo
+
+- Clone this repository
+
+- Update `_END_POSES` path coordinates in demo.py to the paths you would like to visualize
+
+- In terminal in the rsplan subfolder of this rsplan repository, run:
+  `$ python3 demo.py`
+
+#### Example paths visualized from demo.py:
 
 Paths start from origin
 
@@ -72,6 +81,8 @@ Format: (end x, end y, yaw, turn radius, runway length)
 9. (-4, -1, -np.pi / 2.0, 1, 3)
 
 ![Screenshot from 2023-07-18 11-50-32](https://github.com/builtrobotics/mariana/assets/44348827/eed5e06c-059e-48cb-9dc3-e56346f84476)
+
+
 
 
 ## References
