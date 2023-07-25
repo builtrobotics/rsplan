@@ -35,28 +35,32 @@ def path(
     step_size: float,
     length_tolerance: float = 2.0,
 ) -> primitives.Path:
-    """Generates a Reeds-Shepp path given start and end poses (represented as
-    [x, y, yaw]), turn radius, and step size. If the path has no runway, the runway
-    length must be 0.0. If the path has a runway, calculates the runway start pose,
-    creates a Reeds-Shepp path from the given start pose to the runway start pose, and
-    adds a straight Segment to the end of the list of segments in the Path. The runway
-    segment is a straightaway intended to improve the final position accuracy of
-    navigation. The runway can either be driven in forward or reverse depending on the
-    sign of the runway length specified and can have a variable length.
+    """Generates a Reeds-Shepp path given start and end points (represented as
+    [x, y, yaw]), turn radius, and step size. The step size is the distance between each
+    point in the list of points (e.g. 0.05m).
+    
+    If the path has no runway, the runway length must be 0.0.
+    
+    If the path has a runway, calculates the runway start pose, creates a Reeds-Shepp
+    path from the given start pose to the runway start pose, and adds a straight Segment
+    to the end of the list of Segments in the Path. The runway Segment is a straightaway
+    intended to improve the final position accuracy of navigation. The runway can either
+    be driven in forward or reverse depending on the sign of the runway length specified
+    and can have a variable length.
     """
     if runway_length != 0:  # Path has a runway
         runway_direction: Literal[-1, 1] = -1 if runway_length < 0.0 else 1
-        runway_length = abs(runway_length)
+        abs_runway_length = abs(runway_length)
 
         runway_start_pose = _calc_runway_start_pose(
-            end_pose, runway_direction, runway_length
+            end_pose, runway_direction, abs_runway_length
         )
 
         # Find all Reeds-Shepp paths and choose optimal one
         all_paths = _solve_path(start_pose, runway_start_pose, turn_radius, step_size)
         path_rs = _get_optimal_path(all_paths, length_tolerance)
 
-        # Add runway segment to Path segments list
+        # Add runway Segment to Path list of Segments
         runway_segment = _calc_runway_segment(
             runway_start_pose, end_pose, runway_direction, turn_radius
         )
@@ -89,8 +93,6 @@ def _solve_path(
 ) -> List[primitives.Path]:
     """Calls all 6 curve functions and returns a list of all valid Reeds-Shepp paths."""
     # If start is not origin, get end w.r.t. start instead of w.r.t. origin
-    
-    # Change base
     x, y, phi = helpers.change_base(start, end)
 
     # Create list of all Reeds-Shepp paths
