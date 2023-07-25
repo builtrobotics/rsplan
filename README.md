@@ -28,7 +28,7 @@ Contains the following files:
 ### Installation
 You can install this software using pip:
 
-`$ pip install -U rsplan`
+`$ pip3 install -U rsplan`
 
 
 ### Running
