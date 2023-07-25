@@ -8,22 +8,20 @@ import numpy as np
 
 
 def change_base(
-    new_base: Tuple[float, float, float], end_pose2d: Tuple[float, float, float]
+    start_pose: Tuple[float, float, float], end_pose: Tuple[float, float, float]
 ) -> Tuple[float, float, float]:
-    """Given new_base = (x1, y1, theta1) and end_pose2d = (x2, y2, theta2) represented
+    """Given start_pose = (x1, y1, theta1) and end_pose = (x2, y2, theta2) represented
     in a coordinate system with origin (0, 0) and rotation 0 (in radians), return the
-    position and rotation of end_pose2d in the coordinate system with origin (x1, y1)
+    position and rotation of end_pose in the coordinate system with origin (x1, y1)
     and rotation theta1.
     """
-    dx = end_pose2d[0] - new_base[0]
-    dy = end_pose2d[1] - new_base[1]
-    xb, yb = rotate(dx, dy, -new_base[2])
+    dx = end_pose[0] - start_pose[0]
+    dy = end_pose[1] - start_pose[1]
+    xb, yb = rotate(dx, dy, -start_pose[2])
 
-    dtheta = end_pose2d[2] - new_base[2]
+    dtheta = end_pose[2] - start_pose[2]
 
     return xb, yb, dtheta
-
-    return *(helpers.rotate(end[0] - start[0], end[1] - start[1], -start[2])), (end[2] - start[2])
 
 
 def rotate(
@@ -56,7 +54,7 @@ def sign(number: float) -> Literal[-1, 0, 1]:
 def euclidean_distance(
     p1: Tuple[float, float, float], p2: Tuple[float, float, float]
 ) -> float:
-    """Helper method that returns the Euclidean distance between points p1 and p2, each
+    """Helper method that returns the Euclidean distance between poses p1 and p2, each
     in form (x, y, yaw).
     """
     return ((p1[0] - p2[0]) ** 2.0 + (p1[1] - p2[1]) ** 2.0) ** 0.5

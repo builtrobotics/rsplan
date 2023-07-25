@@ -5,9 +5,9 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt  # type: ignore[import]
 import numpy as np
 
-import planner, primitives
+from rsplan import planner, primitives
 
-# List of path endpoints to visualize Reeds-Shepp paths for with matplotlib.
+# List of path end poses to visualize Reeds-Shepp paths for with matplotlib.
 # Format: (end x, end y, end yaw, turn radius, runway length)
 _END_POSES: List[Tuple[float, float, float, int, float]] = [
     (5, 6, np.pi, 1, 0),
@@ -79,9 +79,7 @@ def _demo_scene() -> None:
         x, y, yaw, turn_radius, runway_length = end_coords
         step_size = 0.05
 
-        _plot_arrow(
-            *start
-        )  # Start of path arrow (same for all paths starting at origin)
+        _plot_arrow(*start)  # Start arrow same for all paths starting at origin
 
         # Passing in yaw angles in radians
         rs_path = planner.path(

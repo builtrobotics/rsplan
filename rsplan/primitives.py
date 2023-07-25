@@ -6,18 +6,18 @@ from typing import Any, List, Literal, Optional, Tuple
 
 import numpy as np
 
-import helpers
+from rsplan import helpers
 
 
 @dataclasses.dataclass
 class Path:
-    """Reeds-Shepp path represented as its start/end points, turn radius (in meters),
+    """Reeds-Shepp path represented as its start/end poses, turn radius (in meters),
     and a list of Segments. Additionally contains a step size value (in meters) used to
     calculate the Waypoint representation of the path.
     """
 
-    start_pt: Tuple[float, float, float]
-    end_pt: Tuple[float, float, float]
+    start_pose: Tuple[float, float, float]
+    end_pose: Tuple[float, float, float]
     segments: List[Segment]
     turn_radius: float
     step_size: float
@@ -59,7 +59,7 @@ class Path:
         ]
 
     def coordinates_tuple(self) -> Tuple[List[float], List[float], List[float]]:
-        """Convenience function for decomposing the path points into their components
+        """Convenience function for decomposing the path waypoints into their components
         (x, y, yaw).
         """
         x_coords, y_coords, yaw_coords = [], [], []
@@ -78,14 +78,14 @@ class Path:
         we find the segment motion in positive discretization, then we adjust the sign
         of the motion in the equations.
         """
-        x0, y0, yaw0 = self.start_pt
+        x0, y0, yaw0 = self.start_pose
         path_points: List[Tuple[float, float, float, float, Literal[-1, 1], bool]] = []
 
         # Calculate list of Waypoint parameter tuples for non-runway segments
         for ix, segment in enumerate(self.segments):
             if self._has_runway and ix == len(self.segments) - 1:  # Runway segment
                 seg_points = segment.calc_waypoints(
-                    (x0, y0, yaw0), self.step_size, True, end_pt=self.end_pt
+                    (x0, y0, yaw0), self.step_size, True, end_pose=self.end_pose
                 )
                 # Remove duplicated runway starting point
                 if Waypoint(*path_points[-1]).is_close(Waypoint(*seg_points[0])):
@@ -102,22 +102,22 @@ class Path:
 
         # Ensures that the path's last pt equals the provided end pt by appending end pt
         # to the list of path pts if the last pt in the path is not the end pt
-        end_pt_to_add = self._end_pt_to_add(path_points[-1])
-        path_points.append(end_pt_to_add) if end_pt_to_add is not None else ()
+        end_pose_to_add = self._end_pose_to_add(path_points[-1])
+        path_points.append(end_pose_to_add) if end_pose_to_add is not None else ()
 
         return [Waypoint(*point) for point in path_points]
 
-    def _end_pt_to_add(
+    def _end_pose_to_add(
         self, last_path_pt: Tuple[float, float, float, float, Literal[-1, 1], bool]
     ) -> Optional[Tuple[float, float, float, float, Literal[-1, 1], bool]]:
         """Checks if the last path point equals the provided Path end point. It's
         possible for end points to be slightly off the target end pose due to path
         discretization with a non-ideal step size.
         """
-        end_pt_with_params = (*self.end_pt, *last_path_pt[3:])
-        if not Waypoint(*last_path_pt).is_close(Waypoint(*end_pt_with_params)):
+        end_pose_with_params = (*self.end_pose, *last_path_pt[3:])
+        if not Waypoint(*last_path_pt).is_close(Waypoint(*end_pose_with_params)):
             # Point to append is end point with last 3 parameters from final path point
-            return end_pt_with_params
+            return end_pose_with_params
 
         return None
 
@@ -128,8 +128,8 @@ class Path:
         )
         return hash(
             (
-                self.start_pt,
-                self.end_pt,
+                self.start_pose,
+                self.end_pose,
                 self.turn_radius,
                 self.step_size,
                 segment_tuple,
@@ -160,7 +160,7 @@ class Waypoint:
 
     @property
     def pose_2d_tuple(self) -> Tuple[float, float, float]:
-        """The X, Y, and yaw of the RSNavPoint as a Tuple."""
+        """The X, Y, and yaw of the Waypoint as a Tuple."""
         return (self.x, self.y, self.yaw)
 
     def transform_to(self, end: Waypoint) -> Tuple[float, float, float]:
@@ -169,7 +169,7 @@ class Waypoint:
         """
         x_translation = end.x - self.x
         y_translation = end.y - self.y
-        yaw_rotation = np.rad2deg(end.yaw - self.yaw)
+        yaw_rotation = (end.yaw - self.yaw) * 180 / np.pi
         return x_translation, y_translation, yaw_rotation
 
     def is_close(self, p2: Waypoint) -> bool:
@@ -211,22 +211,22 @@ class Segment:
 
     def calc_waypoints(
         self,
-        start_pt: Tuple[float, float, float],
+        start_pose: Tuple[float, float, float],
         step_size: float,
         is_runway: bool,
-        end_pt: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+        end_pose: Tuple[float, float, float] = (0.0, 0.0, 0.0),
     ) -> List[Tuple[float, float, float, float, Literal[-1, 1], bool]]:
         """Calculate the parameters needed (x, y, yaw coordinates, and list of segment
         length and curvature) to calculate the list of points used to represent this
         segment.
         """
-        if self.is_straight and end_pt != (0.0, 0.0, 0.0):
+        if self.is_straight and end_pose != (0.0, 0.0, 0.0):
             # Runway segment with end point passed in for accuracy
-            xs, ys, yaws = self._straight_runway_pts(start_pt, end_pt, step_size)
+            xs, ys, yaws = self._straight_runway_pts(start_pose, end_pose, step_size)
         else:
             # Non-runway segment
             segment_points = self._interpolated(step_size)
-            xs, ys, yaws = self._get_segment_coords(start_pt, segment_points)
+            xs, ys, yaws = self._get_segment_coords(start_pose, segment_points)
 
         return [
             (xs[i], ys[i], yaws[i], self._curvature(), self.direction, is_runway)
@@ -249,8 +249,8 @@ class Segment:
         end: Tuple[float, float, float],
         step_size: float,
     ) -> Tuple[list[float], list[float], list[float]]:
-        """Calculate a straight line of coordinates from the runway start point to the
-        runway end point using the yaw angle of the runway end point to ensure the
+        """Calculate a straight line of coordinates from the runway start pose to the
+        runway end pose using the yaw angle of the runway end pose to ensure the
         runway coordinates are accurate.
         """
         num_coords = int((self.length / step_size) + 2)
@@ -262,11 +262,11 @@ class Segment:
 
     def _get_segment_coords(
         self,
-        start: Tuple[float, float, float],
+        start_pose: Tuple[float, float, float],
         segment_points: np.ndarray[Any, np.dtype[np.floating[Any]]],
     ) -> Tuple[List[float], List[float], List[float]]:
         """Generates the segment's x, y, yaw coordinate lists for each point in the
-        interpolated list) using the segment type, turn radius, and start point.
+        interpolated list) using the segment type, turn radius, and start pose.
         """
         if self.type == "left":
             xs = self.direction * self.turn_radius * np.sin(segment_points)
@@ -281,7 +281,7 @@ class Segment:
             ys = np.zeros(xs.shape[0])
             yaws = np.zeros(xs.shape[0])
 
-        x0, y0, yaw0 = start
+        x0, y0, yaw0 = start_pose
         # Rotate generic coordinates w.r.t segment start orientation
         yaw_coords = (yaws + yaw0).tolist()
         xs, ys = helpers.rotate(xs, ys, yaw0) if yaw0 != 0 else (xs, ys)

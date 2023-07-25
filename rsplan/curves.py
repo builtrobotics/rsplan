@@ -3,7 +3,7 @@ from typing import Callable, List, Literal, Optional, Tuple
 
 import numpy as np
 
-import helpers, primitives
+from rsplan import helpers, primitives
 
 """This file outlines curve calculations for the 48 different Reeds-Shepp path types.
 A "|" cusp means direction change between the curves (+ to -, - to +).
@@ -455,8 +455,8 @@ def _create_path(
         path_segments.append(_create_segment(segment_param, segment_type, turn_radius))
 
     return primitives.Path(
-        start_pt=start,
-        end_pt=end,
+        start_pose=start,
+        end_pose=end,
         segments=path_segments,
         turn_radius=turn_radius,
         step_size=step_size,

@@ -15,7 +15,7 @@ Inspiration for this Python implementation of the Reeds-Shepp algorithm:
 https://github.com/boyali/reeds_and_shepp_curves/tree/master
 
 Our implementation adds the option for a runway (straightaway segment at the end of the
-path) to improve precision in reaching the given end point. We also prioritize a path
+path) to improve precision in reaching the given end pose. We also prioritize a path
 with fewer segments over a path with a shorter overall length as long as the two paths
 have a total length within 2 meters of each others.
 """
@@ -24,21 +24,21 @@ from typing import List, Literal, Tuple
 
 import numpy as np
 
-import curves, helpers, primitives
+from rsplan import curves, helpers, primitives
 
 
 def path(
-    start_pt: Tuple[float, float, float],
-    end_pt: Tuple[float, float, float],
+    start_pose: Tuple[float, float, float],
+    end_pose: Tuple[float, float, float],
     turn_radius: float,
     runway_length: float,
     step_size: float,
     length_tolerance: float = 2.0,
 ) -> primitives.Path:
-    """Generates a Reeds-Shepp path given start and end points (represented as
+    """Generates a Reeds-Shepp path given start and end poses (represented as
     [x, y, yaw]), turn radius, and step size. If the path has no runway, the runway
-    length must be 0.0. If the path has a runway, calculates the runway start point,
-    creates a Reeds-Shepp path from the given start point to the runway start point, and
+    length must be 0.0. If the path has a runway, calculates the runway start pose,
+    creates a Reeds-Shepp path from the given start pose to the runway start pose, and
     adds a straight Segment to the end of the list of segments in the Path. The runway
     segment is a straightaway intended to improve the final position accuracy of
     navigation. The runway can either be driven in forward or reverse depending on the
@@ -48,28 +48,28 @@ def path(
         runway_direction: Literal[-1, 1] = -1 if runway_length < 0.0 else 1
         runway_length = abs(runway_length)
 
-        runway_start_pt = _calc_runway_start_point(
-            end_pt, runway_direction, runway_length
+        runway_start_pose = _calc_runway_start_pose(
+            end_pose, runway_direction, runway_length
         )
 
         # Find all Reeds-Shepp paths and choose optimal one
-        all_paths = _solve_path(start_pt, runway_start_pt, turn_radius, step_size)
+        all_paths = _solve_path(start_pose, runway_start_pose, turn_radius, step_size)
         path_rs = _get_optimal_path(all_paths, length_tolerance)
 
         # Add runway segment to Path segments list
         runway_segment = _calc_runway_segment(
-            runway_start_pt, end_pt, runway_direction, turn_radius
+            runway_start_pose, end_pose, runway_direction, turn_radius
         )
         segments = path_rs.segments + [runway_segment]
     else:
         # Find all Reeds-Shepp paths and choose optimal one
-        all_paths = _solve_path(start_pt, end_pt, turn_radius, step_size)
+        all_paths = _solve_path(start_pose, end_pose, turn_radius, step_size)
         path_rs = _get_optimal_path(all_paths, length_tolerance)
         segments = path_rs.segments
 
     return primitives.Path(
-        start_pt=start_pt,
-        end_pt=end_pt,
+        start_pose=start_pose,
+        end_pose=end_pose,
         segments=segments,
         turn_radius=turn_radius,
         step_size=step_size,
@@ -91,8 +91,7 @@ def _solve_path(
     # If start is not origin, get end w.r.t. start instead of w.r.t. origin
     
     # Change base
-    x, y = helpers.rotate(end[0] - start[0], end[1] - start[1], -start[2])
-    phi = end[2] - start[2]
+    x, y, phi = helpers.change_base(start, end)
 
     # Create list of all Reeds-Shepp paths
     paths: List[primitives.Path] = []
@@ -110,8 +109,8 @@ def _get_optimal_path(
     paths: List[primitives.Path], length_tolerance: float = 2.0
 ) -> primitives.Path:
     """Choose optimal Reeds-Shepp path from list of valid paths. If two paths have
-    comparable total length (difference is within length tolerance), we will choose the
-    path that has less segments.
+    comparable total length (difference is within length tolerance in meters), we will
+    choose the path that has less segments.
     """
     paths.sort(key=lambda x: x.total_length, reverse=False)
 
@@ -123,20 +122,20 @@ def _get_optimal_path(
     if roughly_equivalent_lengths and longer_less_segments:
         best_path = paths[1]  # Choose second shortest path because it has less segments
     else:
-        best_path = paths[0]  # Choose shortest path (>2m shorter than other paths)
+        best_path = paths[0]  # Choose shortest path (> length tolerance shorter than other paths)
 
     return best_path
 
 
-def _calc_runway_start_point(
-    end_pt: Tuple[float, float, float],
+def _calc_runway_start_pose(
+    end_pose: Tuple[float, float, float],
     driving_direction: Literal[1, -1],
     runway_length: float,
 ) -> Tuple[float, float, float]:
     """The start of the runway. Driving direction indicates whether the robot is
     travelling in forward or reverse along the runway.
     """
-    end_x, end_y, yaw = end_pt  # Yaw is in radians
+    end_x, end_y, yaw = end_pose  # Yaw is in radians
     x = end_x - (driving_direction * abs(runway_length) * np.cos(yaw))
     y = end_y - (driving_direction * abs(runway_length) * np.sin(yaw))
 
@@ -144,13 +143,13 @@ def _calc_runway_start_point(
 
 
 def _calc_runway_segment(
-    start_pt: Tuple[float, float, float],
-    end_pt: Tuple[float, float, float],
+    start_pose: Tuple[float, float, float],
+    end_pose: Tuple[float, float, float],
     direction: Literal[1, -1],
     turn_radius: float,
 ) -> primitives.Segment:
     """Creates a straight Segment representing a path's runway."""
-    path_length = round(helpers.euclidean_distance(start_pt, end_pt), 3)
+    path_length = round(helpers.euclidean_distance(start_pose, end_pose), 3)
 
     return primitives.Segment(
         type="straight",

@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 import pytest
 
-import helpers, planner, primitives
+from rsplan import helpers, planner, primitives
 
 _STEP_SIZE = 0.05  # in meters
 _RANDOM_PATH_DISTANCE_RANGE = 10  # in meters
@@ -80,8 +80,8 @@ def test_straight_path(
     nav_path = _nav_path(start, end, has_runway=False)
     assert nav_path is not None
 
-    assert start == nav_path.start_pt
-    assert end == nav_path.end_pt
+    assert start == nav_path.start_pose
+    assert end == nav_path.end_pose
 
     assert round(nav_path.total_length, 5) == round(
         helpers.euclidean_distance(start, end), 5
@@ -125,8 +125,8 @@ def test_path_no_runway(
     nav_path = _nav_path(start, end, has_runway=False)
 
     assert nav_path.total_length >= helpers.euclidean_distance(start, end)
-    assert start == nav_path.start_pt
-    assert end == nav_path.end_pt
+    assert start == nav_path.start_pose
+    assert end == nav_path.end_pose
 
     assert all(waypoint.is_runway is False for waypoint in nav_path.waypoints())
 
@@ -155,8 +155,8 @@ def test_random_path(seed: int) -> None:
     nav_path = _nav_path(start, end)
 
     assert nav_path.total_length >= helpers.euclidean_distance(start, end)
-    assert nav_path.start_pt == start
-    assert nav_path.end_pt == end
+    assert nav_path.start_pose == start
+    assert nav_path.end_pose == end
 
     for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
         assert wp1 != wp2
