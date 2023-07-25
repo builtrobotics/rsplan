@@ -53,9 +53,9 @@ What are t, u, and v parameters?
 - These are represented generally in the Segment class in the "distance" parameter, which we pass in t, u, v, or pi/2 for depending on the segment.
 
 
-### Exhibits
+## Exhibits
 
-#### How to run the demo
+### How to run the demo
 
 - Clone this repository
 
@@ -64,7 +64,7 @@ What are t, u, and v parameters?
 - In terminal in the rsplan subfolder of this rsplan repository, run:
   `$ python3 demo.py`
 
-#### Example paths visualized from demo.py:
+### Example paths visualized from demo.py:
 
 Paths start from origin
 
