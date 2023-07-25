@@ -2,9 +2,8 @@
 
 - [Overview](#overview)
 - [Usage](#usage)
-  - [Initial setup](#installation)
+  - [Installation](#installation)
   - [Running](#running)
-  - [Demo](#demo)
 - [FAQ](#faq)
 - [Exhibits](#exhibits)
 - [References](#references)
@@ -34,7 +33,7 @@ You can install this software using pip:
 
 ### Running
 
-See demo.py for example usage
+See demo.py for example usage 
 
 path(start_pose, end_pose, turn_radius, runway_length, step_size, length_tolerance (optional))
 - return a Reeds-Shepp path from start_pose to end_pose with specified turning radius and step_size between points. The length_tolerance default is 2 meters but can be set to user preference — if paths’ total lengths are within length tolerance of each other, the path function will choose the one with fewer segments as the optimal path. The runway_length is for the runway at the end of the path that helps improve accuracy in reaching the final position — this can be set to 0, or a positive or negative number for a forwards or backwards driving runway.
