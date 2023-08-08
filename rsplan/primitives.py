@@ -154,7 +154,7 @@ class Waypoint:
     @property
     def turn_direction(self) -> Literal[-1, 0, 1]:
         """The direction to turn at the Waypoint defined by the right hand rule.
-        Turns either left (negative), right (positive) or straight (zero).
+        Turns either left (positive), right (negative) or straight (zero).
         """
         return helpers.sign(self.curvature)
 
@@ -238,9 +238,9 @@ class Segment:
         curve type, and turn radius.
         """
         if self.type == "left":
-            return -1.0 / self.turn_radius
-        elif self.type == "right":
             return 1.0 / self.turn_radius
+        elif self.type == "right":
+            return -1.0 / self.turn_radius
         return 0.0
 
     def _straight_runway_pts(
