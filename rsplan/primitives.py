@@ -5,6 +5,7 @@ import functools
 from typing import Any, List, Literal, Optional, Tuple
 
 import numpy as np
+import math
 
 from rsplan import helpers
 
@@ -308,9 +309,6 @@ class Segment:
         # straight segments) and dtheta (step size / turn radius) for curved segments.
         step = step_size if self.is_straight else step_size / self.turn_radius
 
-        seg_pts = np.arange(0, magnitude, step)
-
-        # Add segment endpoint if the list of segment points is not empty
-        seg_pts = np.append(seg_pts, [magnitude]) if seg_pts.any() else np.array([0.0])
+        seg_pts = np.linspace(0, magnitude, math.ceil(magnitude/step), endpoint=True)
 
         return seg_pts
