@@ -88,7 +88,7 @@ def test_straight_path(
     )
 
     for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
-        assert wp1 != wp2
+        assert not wp1.is_close(wp2)
 
     assert len(set(wp.driving_direction for wp in nav_path.waypoints())) == 1
 
@@ -100,13 +100,13 @@ def test_backward_path(yaw_angle: float) -> None:
     assert nav_path is not None
     assert nav_path.total_length >= helpers.euclidean_distance(_ORIGIN, end)
     for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
-        assert wp1 != wp2
+        assert wp1.pose_2d_tuple != wp2.pose_2d_tuple
 
     nav_path2 = _nav_path(_ROTATED, end)
     assert nav_path2 is not None
     assert nav_path.total_length >= helpers.euclidean_distance(_ORIGIN, end)
     for wp1, wp2 in zip(nav_path2.waypoints()[:-1], nav_path2.waypoints()[1:]):
-        assert wp1 != wp2
+        assert wp1.pose_2d_tuple != wp2.pose_2d_tuple
 
 
 @pytest.mark.parametrize(
@@ -131,7 +131,8 @@ def test_path_no_runway(
     assert all(waypoint.is_runway is False for waypoint in nav_path.waypoints())
 
     for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
-        assert wp1 != wp2
+        assert wp1.pose_2d_tuple != wp2.pose_2d_tuple
+
 
 
 @pytest.mark.parametrize("seed", range(100))
@@ -158,13 +159,9 @@ def test_random_path(seed: int) -> None:
     assert nav_path.start_pose == start
     assert nav_path.end_pose == end
 
-    for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
-        assert wp1 != wp2
-
     # No consecutive duplicates
-    waypoints = nav_path.waypoints()
-    for i in range(len(waypoints)-1):
-        assert not waypoints[i].is_close(waypoints[i+1])
+    for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
+        assert wp1.pose_2d_tuple != wp2.pose_2d_tuple
 
 
 def main() -> None:
