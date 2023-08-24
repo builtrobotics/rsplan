@@ -83,7 +83,7 @@ class Path:
 
         # Calculate list of Waypoint parameter tuples for non-runway segments
         for ix, segment in enumerate(self.segments):
-            if self._has_runway and ix == len(self.segments) - 1: # Runway segment
+            if self._has_runway and ix == len(self.segments) - 1:
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, True, end_pose=self.end_pose
                 )
