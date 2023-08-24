@@ -311,7 +311,7 @@ class Segment:
 
         # Since np.arrange does not handle floating point arithmetic well, we use
         # linspace and the slightly awkward step of calculating the number of steps.
-        num_steps = math.ceil(magnitude / step)
+        num_steps = int((magnitude / step_size) + 1)
         seg_pts = np.linspace(0, magnitude, num_steps, endpoint=True)
 
         return seg_pts
