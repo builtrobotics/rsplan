@@ -84,11 +84,11 @@ class Path:
 
         # Calculate list of Waypoint parameter tuples for non-runway segments
         for ix, segment in enumerate(self.segments):
-            if self._has_runway and ix == len(self.segments) - 1:
+            if self._has_runway and ix == len(self.segments) - 1:  # Runway segment
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, True, end_pose=self.end_pose
                 )
-            else:
+            else:  # Non-runway segment
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, False
                 )
@@ -309,9 +309,8 @@ class Segment:
         # straight segments) and dtheta (step size / turn radius) for curved segments.
         step = step_size if self.is_straight else step_size / self.turn_radius
 
-        # Since np.arrange does not handle floating point arithmetic well, we use
-        # linspace and the slightly awkward step of calculating the number of steps.
-        num_steps = math.ceil(magnitude / step_size)
-        seg_pts = np.linspace(0, magnitude, num_steps, endpoint=True)
 
-        return seg_pts
+        # Prefer linspace to arange to avoid floating point errors. Will distribute
+        # remainder distance across steps instead of having a short final step.
+        num_steps = math.ceil(magnitude / step)
+        return np.linspace(0, magnitude, num_steps, endpoint=True)
