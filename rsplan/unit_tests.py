@@ -161,32 +161,11 @@ def test_random_path(seed: int) -> None:
     for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
         assert wp1 != wp2
 
-
-@pytest.mark.parametrize("seed", range(100))
-def test_random_path_has_unique_waypoints(seed: int) -> None:
-
-    if seed <= 10:
-        start = _ORIGIN
-    else:
-        rng0 = np.random.default_rng(seed + 100)
-        x0 = _RANDOM_PATH_DISTANCE_RANGE * rng0.uniform(-1, 1)
-        y0 = _RANDOM_PATH_DISTANCE_RANGE * rng0.uniform(-1, 1)
-        yaw0 = _RANDOM_PATH_ANGLE_RANGE * rng0.random()
-        start = (x0, y0, yaw0)
-
-    rng = np.random.default_rng(seed)
-    x = _RANDOM_PATH_DISTANCE_RANGE * rng.uniform(-1, 1)
-    y = _RANDOM_PATH_DISTANCE_RANGE * rng.uniform(-1, 1)
-    yaw = _RANDOM_PATH_ANGLE_RANGE * rng.random()
-    end = (x, y, yaw)
-
-    nav_path = _nav_path(start, end)
-
+    # No consecutive duplicates
     waypoints = nav_path.waypoints()
     for i in range(len(waypoints)-1):
-        assert not waypoints[i].is_close(waypoints[i+1]):
+        assert not waypoints[i].is_close(waypoints[i+1])
 
 
 def main() -> None:
-    # test_random_path()
-    test_random_path_has_unique_waypoints(45)
+    test_random_path()
