@@ -83,22 +83,23 @@ class Path:
 
         # Calculate list of Waypoint parameter tuples for non-runway segments
         for ix, segment in enumerate(self.segments):
-            if self._has_runway and ix == len(self.segments) - 1:  # Runway segment
+            if self._has_runway and ix == len(self.segments) - 1:
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, True, end_pose=self.end_pose
                 )
-                # Remove duplicated runway starting point
-                if Waypoint(*path_points[-1]).is_close(Waypoint(*seg_points[0])):
-                    seg_points.pop(0)
-            else:  # Non-runway segment
+            else:
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, False
                 )
 
+            # Remove the duplicated start/end waypoint when combining segments
+            if ix > 0 and Waypoint(*path_points[-1]).is_close(Waypoint(*seg_points[0])):
+                seg_points.pop(0)
+
             path_points.extend(seg_points)  # Add segment pts to list of path pts
 
-            # For next segment, set first point to last pt of this segment
-            x0, y0, yaw0 = seg_points[-1][0], seg_points[-1][1], seg_points[-1][2]
+            # For next segment, set first point to last pt in the current path
+            x0, y0, yaw0 = path_points[-1][0], path_points[-1][1], path_points[-1][2]
 
         # Ensures that the path's last pt equals the provided end pt by appending end pt
         # to the list of path pts if the last pt in the path is not the end pt
