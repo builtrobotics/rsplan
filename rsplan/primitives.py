@@ -5,6 +5,7 @@ import functools
 from typing import Any, List, Literal, Optional, Tuple
 
 import numpy as np
+import math
 
 from rsplan import helpers
 
@@ -87,18 +88,19 @@ class Path:
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, True, end_pose=self.end_pose
                 )
-                # Remove duplicated runway starting point
-                if Waypoint(*path_points[-1]).is_close(Waypoint(*seg_points[0])):
-                    seg_points.pop(0)
             else:  # Non-runway segment
                 seg_points = segment.calc_waypoints(
                     (x0, y0, yaw0), self.step_size, False
                 )
 
+            # Remove the duplicated start/end waypoint when combining segments
+            if ix > 0 and Waypoint(*path_points[-1]).is_close(Waypoint(*seg_points[0])):
+                seg_points.pop(0)
+
             path_points.extend(seg_points)  # Add segment pts to list of path pts
 
-            # For next segment, set first point to last pt of this segment
-            x0, y0, yaw0 = seg_points[-1][0], seg_points[-1][1], seg_points[-1][2]
+            # For next segment, set first point to last pt in the current path
+            x0, y0, yaw0 = path_points[-1][0], path_points[-1][1], path_points[-1][2]
 
         # Ensures that the path's last pt equals the provided end pt by appending end pt
         # to the list of path pts if the last pt in the path is not the end pt
@@ -307,9 +309,8 @@ class Segment:
         # straight segments) and dtheta (step size / turn radius) for curved segments.
         step = step_size if self.is_straight else step_size / self.turn_radius
 
-        seg_pts = np.arange(0, magnitude, step)
 
-        # Add segment endpoint if the list of segment points is not empty
-        seg_pts = np.append(seg_pts, [magnitude]) if seg_pts.any() else np.array([0.0])
-
-        return seg_pts
+        # Prefer linspace to arange to avoid floating point errors. Will distribute
+        # remainder distance across steps instead of having a short final step.
+        num_steps = math.ceil(magnitude / step)
+        return np.linspace(0, magnitude, num_steps, endpoint=True)
