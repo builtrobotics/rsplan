@@ -8,10 +8,12 @@ def read(fname):
 
 setup(
     name = "rsplan",
-    version = "1.0.8",
+    version = "1.0.9",
     author = "Built Robotics",
-    author_email = "tarakapoor9@gmail.com",
+    author_email = "engineering@builtrobotics.com",
     description = ("Reeds-Shepp algorithm implementation in Python."),
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     license = "MIT",
     keywords = "reeds-shepp path planning",
     url = "https://github.com/builtrobotics/rsplan",
