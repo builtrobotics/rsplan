@@ -9,7 +9,7 @@ name = "rsplan"
 version = "1.0.9"
 description = "Reeds-Shepp algorithm implementation in Python"
 readme = "README.md"
-authors = [{ name = "Built Robotics", email = "tarakapoor9@gmail.com" }]
+authors = [{ name = "Built Robotics", email = "engineering@builtrobotics.com" }]
 license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
