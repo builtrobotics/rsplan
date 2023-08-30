@@ -5,7 +5,6 @@ import functools
 from typing import Any, List, Literal, Optional, Tuple
 
 import numpy as np
-import math
 
 from rsplan import helpers
 
