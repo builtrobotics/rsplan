@@ -101,26 +101,8 @@ class Path:
             # For next segment, set first point to last pt in the current path
             x0, y0, yaw0 = path_points[-1][0], path_points[-1][1], path_points[-1][2]
 
-        # Ensures that the path's last pt equals the provided end pt by appending end pt
-        # to the list of path pts if the last pt in the path is not the end pt
-        end_pose_to_add = self._end_pose_to_add(path_points[-1])
-        path_points.append(end_pose_to_add) if end_pose_to_add is not None else ()
-
         return [Waypoint(*point) for point in path_points]
 
-    def _end_pose_to_add(
-        self, last_path_pt: Tuple[float, float, float, float, Literal[-1, 1], bool]
-    ) -> Optional[Tuple[float, float, float, float, Literal[-1, 1], bool]]:
-        """Checks if the last path point equals the provided Path end point. It's
-        possible for end points to be slightly off the target end pose due to path
-        discretization with a non-ideal step size.
-        """
-        end_pose_with_params = (*self.end_pose, *last_path_pt[3:])
-        if not Waypoint(*last_path_pt).is_close(Waypoint(*end_pose_with_params)):
-            # Point to append is end point with last 3 parameters from final path point
-            return end_pose_with_params
-
-        return None
 
     def __hash__(self) -> int:
         segment_tuple = tuple(
@@ -221,13 +203,12 @@ class Segment:
         length and curvature) to calculate the list of points used to represent this
         segment.
         """
-        if self.is_straight and end_pose != (0.0, 0.0, 0.0):
-            # Runway segment with end point passed in for accuracy
-            xs, ys, yaws = self._straight_runway_pts(start_pose, end_pose, step_size)
-        else:
-            # Non-runway segment
-            segment_points = self._interpolated(step_size)
-            xs, ys, yaws = self._get_segment_coords(start_pose, segment_points)
+        segment_points = self._interpolated(step_size)
+        xs, ys, yaws = self._get_segment_coords(start_pose, segment_points)
+
+        # If it is a runway we want to use the end_pose yaw
+        if is_runway:
+            yaws = [end_pose[-1] for _ in yaws]
 
         return [
             (xs[i], ys[i], yaws[i], self._curvature(), self.direction, is_runway)
@@ -244,22 +225,6 @@ class Segment:
             return -1.0 / self.turn_radius
         return 0.0
 
-    def _straight_runway_pts(
-        self,
-        start: Tuple[float, float, float],
-        end: Tuple[float, float, float],
-        step_size: float,
-    ) -> Tuple[list[float], list[float], list[float]]:
-        """Calculate a straight line of coordinates from the runway start pose to the
-        runway end pose using the yaw angle of the runway end pose to ensure the
-        runway coordinates are accurate.
-        """
-        num_coords = int((self.length / step_size) + 2)
-        x_coords = (np.linspace(start[0], end[0], num=num_coords, dtype=float)).tolist()
-        y_coords = (np.linspace(start[1], end[1], num=num_coords, dtype=float)).tolist()
-        yaw_coords = (np.ones(num_coords) * end[2]).tolist()
-
-        return x_coords, y_coords, yaw_coords
 
     def _get_segment_coords(
         self,
@@ -307,7 +272,6 @@ class Segment:
         # step is the distance between points along the segment: dl (linear distance for
         # straight segments) and dtheta (step size / turn radius) for curved segments.
         step = step_size if self.is_straight else step_size / self.turn_radius
-
 
         # Prefer linspace to arange to avoid floating point errors. Will distribute
         # remainder distance across steps instead of having a short final step.
