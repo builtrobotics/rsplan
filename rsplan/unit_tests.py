@@ -168,5 +168,6 @@ def test_random_path(seed: int) -> None:
         # No individual distance is greater than the step size
         assert round(helpers.euclidean_distance(wp1_pose, wp2_pose), 2) <= _STEP_SIZE
 
+
 def main() -> None:
     test_random_path()

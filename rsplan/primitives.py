@@ -308,8 +308,9 @@ class Segment:
         # straight segments) and dtheta (step size / turn radius) for curved segments.
         step = step_size if self.is_straight else step_size / self.turn_radius
 
-
+        # Calculate num_steps to guarantee at least 2 points (start and end),
+        # addressing cases where magnitude < step size.
+        num_steps = int((magnitude / step) + 2)
         # Prefer linspace to arange to avoid floating point errors. Will distribute
         # remainder distance across steps instead of having a short final step.
-        num_steps = int((magnitude / step) + 2)
         return np.linspace(0, magnitude, num_steps, endpoint=True)
