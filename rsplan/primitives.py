@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
-from typing import Any, List, Literal, Optional, Tuple
+from typing import Any, List, Literal, Tuple
 
 import numpy as np
 
