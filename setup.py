@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name = "rsplan",
-    version = "1.0.9",
+    version = "1.0.10",
     author = "Built Robotics",
     author_email = "engineering@builtrobotics.com",
     description = ("Reeds-Shepp algorithm implementation in Python."),
