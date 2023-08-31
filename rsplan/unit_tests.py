@@ -159,9 +159,14 @@ def test_random_path(seed: int) -> None:
     assert nav_path.start_pose == start
     assert nav_path.end_pose == end
 
-    # No consecutive duplicates
+
     for wp1, wp2 in zip(nav_path.waypoints()[:-1], nav_path.waypoints()[1:]):
-        assert wp1.pose_2d_tuple != wp2.pose_2d_tuple
+        wp1_pose = wp1.pose_2d_tuple
+        wp2_pose = wp2.pose_2d_tuple
+        # No consecutive duplicates
+        assert wp1_pose != wp2_pose
+        # No individual distance is greater than the step size
+        assert round(helpers.euclidean_distance(wp1_pose, wp2_pose), 2) <= _STEP_SIZE
 
 
 def main() -> None:
